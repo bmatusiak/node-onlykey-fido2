@@ -15,27 +15,34 @@ async function setTime(){
   const OKCONNECT = 228;
 
   var message = [255, 255, 255, 255, OKCONNECT]; //Add header and message type
-  var currentEpochTime = Math.round(new Date().getTime() / 1000.0).toString(16);
+//   var currentEpochTime = Math.round(new Date().getTime() / 1000.0).toString(16);
+  var currentEpochTime = Math.round(1593590900007 / 1000.0).toString(16);
   var timePart = currentEpochTime.match(/.{2}/g).map(hexStrToDec);
   Array.prototype.push.apply(message, timePart);
 
-  var appKey = nacl.box.keyPair();
+  var appKey = 
+  //nacl.box.keyPair();
+  {
+    publicKey: Uint8Array.from([207, 148, 246, 173, 237, 92, 82, 218, 43, 28, 156, 222, 232, 7, 254, 45, 27, 93, 175, 139, 18, 178, 23, 86, 30, 225, 86, 44, 183, 87, 133, 95]),
+    secretKey: Uint8Array.from([6, 213, 150, 12, 91, 72, 242, 31, 211, 36, 201, 199, 60, 108, 209, 13, 164, 35, 226, 234, 62, 11, 228, 187, 3, 197, 196, 39, 9, 46, 59, 128])
+  }
 
   Array.prototype.push.apply(message, appKey.publicKey);
   var env = ["N".charCodeAt(0), "L".charCodeAt(0)];
   Array.prototype.push.apply(message, env);
 
-  encryptedkeyHandle = Uint8Array.from(message); // Not encrypted as this is the initial key exchange
-
   var additional_d = "test";
 
-  if (!additional_d) {
-    // SHA256 hash of empty buffer
-    dataHash = await digestArray(Uint8Array.from(new Uint8Array(32)));
-  } else {
-    // SHA256 hash of input data
-    dataHash = await digestArray(Uint8Array.from(additional_d));
-  }
+//   if (!additional_d) {
+//     // SHA256 hash of empty buffer
+//     dataHash = await digestArray(Uint8Array.from(new Uint8Array(32)));
+//   } else {
+//     // SHA256 hash of input data
+//     dataHash = await digestArray(Uint8Array.from(additional_d));
+//   }
+  dataHash = Uint8Array.from(new Uint8Array(32));
+
+  Array.prototype.push.apply(message, dataHash);
   // optype
   // #define DERIVE_PUBLIC_KEY 1
   // #define DERIVE_SHARED_SECRET 2
@@ -48,9 +55,11 @@ async function setTime(){
   //#define NO_ENCRYPT_RESP 0
   //#define ENCRYPT_RESP 1
 
+  encryptedkeyHandle = Uint8Array.from(message); // Not encrypted as this is the initial key exchange
+
   var optype = 1;
   var keytype = 1;
-  var enc_resp = 1;
+  var enc_resp = 0;
 
   //OKCONNECT, optype, keytype, enc_resp, encryptedkeyHandle
   //var keyhandle = encode_ctaphid_request_as_keyhandle(OKCONNECT,  2, null, null, encryptedkeyHandle)
@@ -62,7 +71,7 @@ async function setTime(){
 
   var timeout = 6000
 
-  var id = "apps.crp.to"
+  var domain = "apps.crp.to"
 
 fido2.getAssertion({
     publicKey:{
@@ -72,15 +81,18 @@ fido2.getAssertion({
         type: 'public-key',
       }],
       timeout: timeout,
-      rpId: id,
+//       rpId: domain,
       userVerification: 'discouraged',
-      extensions: {
-        appid: 'https://' + id
-      }
+//       extensions: {
+//         appid: 'https://' + domain
+//       }
     }
   }, "https://apps.crp.to").catch(function(err){
-
-    console.log("ERROR",err)
+    
+    console.warn("ERROR CALLING:", cmd, opt1, opt2, opt3, data);
+    console.warn("THE ERROR:", error);
+    console.warn("NAME:", error.name);
+    console.warn("MESSAGE:", error.message);
     
   }).then((assertion) => {
 
@@ -90,6 +102,8 @@ fido2.getAssertion({
     }
     //console.log(assertion)
     var response = assertion.response;
+
+    console.log("RESPONCE:",response)
 
     var signature_count = (
     new DataView(toArrayBuffer(Buffer.from(response.authenticatorData.slice(33, 37))))
@@ -120,6 +134,8 @@ fido2.getAssertion({
     results.FWversion = bytes2string(response.slice(8, 20));
     
 
+    
+
     // Public ECC key will be an uncompressed ECC key, 65 bytes for P256, 32 bytes for NACL/CURVE25519 padded with 0s
     
     if (keytype == 0 || keytype == 3) {
@@ -130,11 +146,19 @@ fido2.getAssertion({
     }
     
     
-    console.log("results",results);
-//     ONLYKEY_ECDH_P256_to_EPUB(results.sharedPub, function(epub) {
-//       results.epub = epub;
-//       console.log("results",results);
-//     })
+    
+    ONLYKEY_ECDH_P256_to_EPUB(results.sharedPub, function(epub) {
+      results.epub = epub;
+      console.log("results",{
+          unlocked:results.unlocked,
+          okPub:toHexString(results.okPub),
+          sharedsec:toHexString(results.sharedsec),
+          OKversion:results.OKversion,
+          FWversion:results.FWversion,
+          sharedPub:toHexString(results.sharedPub),
+          epub:epub
+        });
+    })
 
 
   });
@@ -142,6 +166,29 @@ fido2.getAssertion({
 
 
 setTime();
+function byteToHex(byte) {
+  // convert the possibly signed byte (-128 to 127) to an unsigned byte (0 to 255).
+  // if you know, that you only deal with unsigned bytes (Uint8Array), you can omit this line
+  const unsignedByte = byte & 0xff;
+
+  // If the number can be represented with only 4 bits (0-15), 
+  // the hexadecimal representation of this number is only one char (0-9, a-f). 
+  if (unsignedByte < 16) {
+    return unsignedByte.toString(16).toUpperCase();
+  } else {
+    return unsignedByte.toString(16).toUpperCase();
+  }
+}
+
+// bytes is an typed array (Int8Array or Uint8Array)
+function toHexString(bytes) {
+  // Since the .map() method is not available for typed arrays, 
+  // we will convert the typed array to an array using Array.from().
+  return Array.from(bytes)
+    .map(byte => byteToHex(byte))
+    .join(' ');
+}
+
 
 async function sha256(s) {
     var hash = await crypto.subtle.digest({
@@ -180,11 +227,11 @@ function toArrayBuffer(buf) {
 }
 
 function encode_ctaphid_request_as_keyhandle(cmd, opt1, opt2, opt3, data) {
-  // console.log('REQUEST CMD', cmd);
-  // console.log('REQUEST OPT1', opt1);
-  // console.log('REQUEST OPT2', opt2);
-  // console.log('REQUEST OPT3', opt3);
-  // console.log('REQUEST DATA', data);
+  console.log('REQUEST CMD', toHexString([cmd]));
+  console.log('REQUEST OPT1', toHexString([opt1]));
+  console.log('REQUEST OPT2', toHexString([opt2]));
+  console.log('REQUEST OPT3', toHexString([opt3]));
+  console.log('REQUEST DATA', toHexString(data));
   //var addr = 0;
 
   // should we check that `data` is either null or an Uint8Array?
@@ -215,7 +262,7 @@ function encode_ctaphid_request_as_keyhandle(cmd, opt1, opt2, opt3, data) {
 
   array.set(data, offset);
 
-  // console.log('FORMATTED REQUEST:', array);
+  console.log('FORMATTED REQUEST:', toHexString(array));
   return array;
 }
 
