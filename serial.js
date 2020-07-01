@@ -28,10 +28,10 @@ hidDev.getDeviceInfo()
 
 setInterval(function(){
 
-    var bfrstr = bytes2string(hidDev.readSync()).replace("\n", "\r\n");
-    console.log(bfrstr)
+    var bfrstr = bytes2string(hidDev.readSync());
+    process.stdout.write(bfrstr)
     
-},10)
+},1)
 
     
 
