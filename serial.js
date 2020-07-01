@@ -12,11 +12,20 @@ wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 var hids = hid.devices();
 
-// console.log(hids)
+//console.log(hids)
 
-var hidDev = new hid.HID(hids[3].path)
+var hidpath = false;
 
-hidDev.getDeviceInfo()
+for(var i in hids){
+  if(hids[i].product =="ONLYKEY" && hids[i].interface == 3){
+    hidpath = hids[i].path;
+  }
+}
+
+
+var hidDev = new hid.HID(hidpath);
+
+console.log(hidDev.getDeviceInfo());
 // hidDev.setNonBlocking(1)
 // hidDev.read(console.log);
 // var out
