@@ -1,0 +1,24 @@
+{
+  "name": "onlykey-fido2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bmatusiak/node-onlykey-fido2.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bmatusiak/node-onlykey-fido2/issues"
+  },
+  "homepage": "https://github.com/bmatusiak/node-onlykey-fido2#readme",
+  "dependencies": {
+    "@vincss-public-projects/fido2-client": "git+https://github.com/bmatusiak/FIDO2Client.git",
+    "node-webcrypto-shim": "0.0.1",
+    "tweetnacl": "^1.0.3"
+  }
+}
