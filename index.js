@@ -1,13 +1,16 @@
 //debugger;
 delete require.cache[__dirname+"/index.js"]; //require("./index.js")
 
-function setTime(){
+const crypto = require('node-webcrypto-shim');
+const atob = require("atob");
+const btoa = require("btoa");
+
+async function setTime(){
 
   var { FIDO2Client } = require("@vincss-public-projects/fido2-client");
   var fido2 = new FIDO2Client();
   var nacl = require("tweetnacl");
 
-  const crypto = require('node-webcrypto-shim')
 
   const OKCONNECT = 228;
 
@@ -24,7 +27,36 @@ function setTime(){
 
   encryptedkeyHandle = Uint8Array.from(message); // Not encrypted as this is the initial key exchange
 
-  var keyhandle = encode_ctaphid_request_as_keyhandle(OKCONNECT,  2, null, null, encryptedkeyHandle)
+  var additional_d = "test";
+
+  if (!additional_d) {
+    // SHA256 hash of empty buffer
+    dataHash = await digestArray(Uint8Array.from(new Uint8Array(32)));
+  } else {
+    // SHA256 hash of input data
+    dataHash = await digestArray(Uint8Array.from(additional_d));
+  }
+  // optype
+  // #define DERIVE_PUBLIC_KEY 1
+  // #define DERIVE_SHARED_SECRET 2
+  // keytype
+  //#define KEYTYPE_NACL 0
+  //#define KEYTYPE_P256R1 1 
+  //#define KEYTYPE_P256K1 2 
+  //#define KEYTYPE_CURVE25519 3
+  // enc_resp
+  //#define NO_ENCRYPT_RESP 0
+  //#define ENCRYPT_RESP 1
+
+  var optype = 1;
+  var keytype = 1;
+  var enc_resp = 1;
+
+  //OKCONNECT, optype, keytype, enc_resp, encryptedkeyHandle
+  //var keyhandle = encode_ctaphid_request_as_keyhandle(OKCONNECT,  2, null, null, encryptedkeyHandle)
+  var keyhandle = encode_ctaphid_request_as_keyhandle(OKCONNECT, optype, keytype, enc_resp, encryptedkeyHandle)
+  
+  
 
   var challenge = Uint8Array.from(crypto.getRandomValues(new Uint8Array(32)));
 
@@ -46,8 +78,16 @@ fido2.getAssertion({
         appid: 'https://' + id
       }
     }
-  }, "https://apps.crp.to").then((assertion) => {
+  }, "https://apps.crp.to").catch(function(err){
 
+    console.log("ERROR",err)
+    
+  }).then((assertion) => {
+
+    if(!assertion){
+      console.log("no assertion")
+      return;
+    }
     //console.log(assertion)
     var response = assertion.response;
 
@@ -71,23 +111,53 @@ fido2.getAssertion({
     console.log(ctap_error_codes[status_code])
     results.unlocked = false;    
     if (bytes2string(data.slice(0, 9)) == 'UNLOCKEDv') {
-    // Reset shared secret and start over
-    // _$status(element_by_id('onlykey_start').value);
-    results.unlocked = true;
+      results.unlocked = true;
     }
 
     results.okPub = response.slice(21, 53);
-    // console.info("OnlyKey Public Key: ", okPub);
     results.sharedsec = nacl.box.before(Uint8Array.from(results.okPub), appKey.secretKey);
-    // console.info("NACL shared secret: ", onlykey_api.sharedsec);
     results.OKversion = response[19] == 99 ? 'Color' : 'Original';
     results.FWversion = bytes2string(response.slice(8, 20));
+    
 
+    // Public ECC key will be an uncompressed ECC key, 65 bytes for P256, 32 bytes for NACL/CURVE25519 padded with 0s
+    
+    if (keytype == 0 || keytype == 3) {
+      results.sharedPub = response.slice(response.length - 65, response.length - 33);
+    }
+    else {
+      results.sharedPub = response.slice(53, response.length);
+    }
+    
+    
     console.log("results",results);
+//     ONLYKEY_ECDH_P256_to_EPUB(results.sharedPub, function(epub) {
+//       results.epub = epub;
+//       console.log("results",results);
+//     })
+
 
   });
 }
 
+
+setTime();
+
+async function sha256(s) {
+    var hash = await crypto.subtle.digest({
+        name: 'SHA-256'
+    }, new window.TextEncoder().encode(s));
+    hash = buf2hex(hash);
+    hash = Array.from(hash.match(/.{2}/g).map(hexStrToDec));
+    return hash;
+}
+
+async function digestArray(buff) {
+    const msgUint8 = buff;
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer)); // convert buffer to byte array
+    return hashArray;
+}
 
 function hexStrToDec(hexStr) {
   return ~~(new Number('0x' + hexStr).toString(10));
@@ -200,3 +270,74 @@ var ctap_error_codes = {
 
 
   
+function u2f_unb64(s) {
+    s = s.replace(/-/g, '+').replace(/_/g, '/');
+    return atob(s + '==='.slice((s.length + 3) % 4));
+}
+
+function arrayBufToBase64UrlEncode(buf) {
+    var binary = '';
+    var bytes = new Uint8Array(buf);
+    for (var i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary)
+        .replace(/\//g, '_')
+        .replace(/=/g, '')
+        .replace(/\+/g, '-');
+}
+
+function arrayBufToBase64UrlDecode(ba64) {
+    var binary = u2f_unb64(ba64);
+    var bytes = [];
+    for (var i = 0; i < binary.length; i++) {
+        bytes.push(binary.charCodeAt(i));
+    }
+
+    return new Uint8Array(bytes);
+}
+
+async function ONLYKEY_ECDH_P256_to_EPUB(publicKeyRawBuffer, callback) {
+    //https://stackoverflow.com/questions/56846930/how-to-convert-raw-representations-of-ecdh-key-pair-into-a-json-web-key
+
+    // var orig_publicKeyRawBuffer = Uint8Array.from(publicKeyRawBuffer);
+
+    //console.log("publicKeyRawBuffer  B", publicKeyRawBuffer)
+    publicKeyRawBuffer = Array.from(publicKeyRawBuffer)
+    publicKeyRawBuffer.unshift(publicKeyRawBuffer.pop());
+    publicKeyRawBuffer = Uint8Array.from(publicKeyRawBuffer);
+
+    //console.log("publicKeyRawBuffer  F", publicKeyRawBuffer)
+    var importedPubKey = await crypto.subtle.importKey(
+        'jwk', {
+            kty: "EC",
+            crv: "P-256",
+            x: arrayBufToBase64UrlEncode(publicKeyRawBuffer.slice(1, 33)),
+            y: arrayBufToBase64UrlEncode(publicKeyRawBuffer.slice(33, 66))
+        }, {
+            name: 'ECDH',
+            namedCurve: 'P-256'
+        },
+        true, []
+    );
+
+    crypto.subtle.exportKey(
+            "jwk", //can be "jwk" (public or private), "raw" (public only), "spki" (public only), or "pkcs8" (private only)
+            importedPubKey //can be a publicKey or privateKey, as long as extractable was true
+        )
+        .then(function(keydata) {
+
+            var OK_SEA_epub = keydata.x + '.' + keydata.y;
+
+            // console.log("raw to epub", OK_SEA_epub, orig_publicKeyRawBuffer)
+
+            if (callback)
+                callback(OK_SEA_epub);
+
+        })
+        .catch(function(err) {
+            console.error(err);
+        });
+
+
+}

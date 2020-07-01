@@ -18,6 +18,8 @@
   "homepage": "https://github.com/bmatusiak/node-onlykey-fido2#readme",
   "dependencies": {
     "@vincss-public-projects/fido2-client": "git+https://github.com/bmatusiak/FIDO2Client.git",
+    "atob": "^2.1.2",
+    "btoa": "^1.2.1",
     "node-webcrypto-shim": "0.0.1",
     "tweetnacl": "^1.0.3"
   }
