@@ -42,7 +42,7 @@ async function setTime(){
 //   }
   dataHash = Uint8Array.from(new Uint8Array(32));
 
-  Array.prototype.push.apply(message, dataHash);
+  //Array.prototype.push.apply(message, dataHash);
   // optype
   // #define DERIVE_PUBLIC_KEY 1
   // #define DERIVE_SHARED_SECRET 2
@@ -64,8 +64,6 @@ async function setTime(){
   //OKCONNECT, optype, keytype, enc_resp, encryptedkeyHandle
   //var keyhandle = encode_ctaphid_request_as_keyhandle(OKCONNECT,  2, null, null, encryptedkeyHandle)
   var keyhandle = encode_ctaphid_request_as_keyhandle(OKCONNECT, optype, keytype, enc_resp, encryptedkeyHandle)
-  
-  
 
   var challenge = Uint8Array.from(crypto.getRandomValues(new Uint8Array(32)));
 
@@ -103,7 +101,11 @@ fido2.getAssertion({
     //console.log(assertion)
     var response = assertion.response;
 
-    console.log("RESPONCE:",response)
+    console.log("RESPONCE:",{
+      clientDataJSON:toHexString(response.clientDataJSON),
+      authenticatorData:toHexString(response.authenticatorData),
+      signature:toHexString(response.signature)
+    })
 
     var signature_count = (
     new DataView(toArrayBuffer(Buffer.from(response.authenticatorData.slice(33, 37))))
@@ -244,7 +246,7 @@ function encode_ctaphid_request_as_keyhandle(cmd, opt1, opt2, opt3, data) {
   }
 
   // `is_extension_request` expects at least 16 bytes of data
-  const data_pad = data.length < 16 ? 16 - data.length : 0;
+  const data_pad = /* data.length < 16 ? 16 - data.length : */ 255-data.length-offset;
   var array = new Uint8Array(offset + data.length + data_pad);
 
   array[0] = cmd & 0xff;
@@ -262,7 +264,7 @@ function encode_ctaphid_request_as_keyhandle(cmd, opt1, opt2, opt3, data) {
 
   array.set(data, offset);
 
-  console.log('FORMATTED REQUEST:', toHexString(array));
+  console.log('FORMATTED REQUEST:('+array.length+')', toHexString(array));
   return array;
 }
 
