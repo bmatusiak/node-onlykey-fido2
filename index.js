@@ -10,15 +10,22 @@ async function setTime(){
   var { FIDO2Client } = require("@vincss-public-projects/fido2-client");
   var fido2 = new FIDO2Client();
   var nacl = require("tweetnacl");
-
+	
+	var message = [];
+	function pushToMessage(msg_section_name, message_section){
+		var msg = {};msg[msg_section_name] = toHexString(message_section);
+		console.log(msg)
+		Array.prototype.push.apply(message, message_section);
+	}
+	
 
   const OKCONNECT = 228;
 
-  var message = [255, 255, 255, 255, OKCONNECT]; //Add header and message type
+  pushToMessage("message",[255, 255, 255, 255, OKCONNECT]); //Add header and message type
 //   var currentEpochTime = Math.round(new Date().getTime() / 1000.0).toString(16);
   var currentEpochTime = Math.round(1593590900007 / 1000.0).toString(16);
   var timePart = currentEpochTime.match(/.{2}/g).map(hexStrToDec);
-  Array.prototype.push.apply(message, timePart);
+  pushToMessage("timePart", timePart);
 
   var appKey = 
   //nacl.box.keyPair();
@@ -27,22 +34,27 @@ async function setTime(){
     secretKey: Uint8Array.from([6, 213, 150, 12, 91, 72, 242, 31, 211, 36, 201, 199, 60, 108, 209, 13, 164, 35, 226, 234, 62, 11, 228, 187, 3, 197, 196, 39, 9, 46, 59, 128])
   }
 
-  Array.prototype.push.apply(message, appKey.publicKey);
+  pushToMessage("appKey.publicKey",appKey.publicKey);
+  
   var env = ["N".charCodeAt(0), "L".charCodeAt(0)];
-  Array.prototype.push.apply(message, env);
+  pushToMessage("env",env);
+  
+  var additionalData_a = "test";
 
-  var additional_d = "test";
-
-//   if (!additional_d) {
+//   if (!additionalData_a) {
 //     // SHA256 hash of empty buffer
-//     dataHash = await digestArray(Uint8Array.from(new Uint8Array(32)));
+//     additionalData_a = await digestArray(Uint8Array.from(new Uint8Array(32)));
 //   } else {
 //     // SHA256 hash of input data
-//     dataHash = await digestArray(Uint8Array.from(additional_d));
+//     additionalData_a = await digestArray(Uint8Array.from(additional_d));
 //   }
-  dataHash = Uint8Array.from(new Uint8Array(32));
+  
+  additionalData_a = Uint8Array.from([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]);
+	pushToMessage("additionalData_a",additionalData_a);
 
-  //Array.prototype.push.apply(message, dataHash);
+	var additionalData_b = Uint8Array.from([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);  
+	pushToMessage("additionalData_b",additionalData_b);
+	
   // optype
   // #define DERIVE_PUBLIC_KEY 1
   // #define DERIVE_SHARED_SECRET 2
@@ -61,7 +73,7 @@ async function setTime(){
   var keytype = 1;
   var enc_resp = 0;
 
-  //OKCONNECT, optype, keytype, enc_resp, encryptedkeyHandle
+  //cmd, optype, keytype, enc_resp, encryptedkeyHandle
   //var keyhandle = encode_ctaphid_request_as_keyhandle(OKCONNECT,  2, null, null, encryptedkeyHandle)
   var keyhandle = encode_ctaphid_request_as_keyhandle(OKCONNECT, optype, keytype, enc_resp, encryptedkeyHandle)
 
@@ -229,11 +241,13 @@ function toArrayBuffer(buf) {
 }
 
 function encode_ctaphid_request_as_keyhandle(cmd, opt1, opt2, opt3, data) {
-  console.log('REQUEST CMD', toHexString([cmd]));
-  console.log('REQUEST OPT1', toHexString([opt1]));
-  console.log('REQUEST OPT2', toHexString([opt2]));
-  console.log('REQUEST OPT3', toHexString([opt3]));
-  console.log('REQUEST DATA', toHexString(data));
+	console.log({
+		cmd:toHexString([cmd]),
+		opt1:toHexString([opt1]),
+		opt2:toHexString([opt2]),
+		opt3:toHexString([opt3]),
+		data:toHexString(data)			
+	})
   //var addr = 0;
 
   // should we check that `data` is either null or an Uint8Array?
@@ -264,7 +278,7 @@ function encode_ctaphid_request_as_keyhandle(cmd, opt1, opt2, opt3, data) {
 
   array.set(data, offset);
 
-  console.log('FORMATTED REQUEST:('+array.length+')', toHexString(array));
+  //console.log('FORMATTED REQUEST:('+array.length+')', toHexString(array));
   return array;
 }
 
