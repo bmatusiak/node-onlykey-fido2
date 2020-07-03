@@ -36,7 +36,7 @@ async function setTime(){
 
   pushToMessage("appKey.publicKey",appKey.publicKey);
   
-  var env = ["N".charCodeAt(0), "L".charCodeAt(0)];
+  var env = ["N".charCodeAt(0), "W".charCodeAt(0)];
   pushToMessage("env",env);
   
   var additionalData_a = "test";
@@ -49,11 +49,11 @@ async function setTime(){
 //     additionalData_a = await digestArray(Uint8Array.from(additional_d));
 //   }
   
-  additionalData_a = Uint8Array.from([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]);
-	pushToMessage("additionalData_a",additionalData_a);
+  //additionalData_a = Uint8Array.from([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]);
+	//pushToMessage("additionalData_a",additionalData_a);
 
-	var additionalData_b = Uint8Array.from([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);  
-	pushToMessage("additionalData_b",additionalData_b);
+	//var additionalData_b = Uint8Array.from([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);  
+	//pushToMessage("additionalData_b",additionalData_b);
 	
   // optype
   // #define DERIVE_PUBLIC_KEY 1
@@ -72,10 +72,17 @@ async function setTime(){
   var optype = 1;
   var keytype = 1;
   var enc_resp = 0;
+  
+  const cmd = OKCONNECT,
+	  opt1 = optype, 
+	  opt2 = keytype, 
+	  opt3 = enc_resp, 
+	  data = encryptedkeyHandle;
+  
 
   //cmd, optype, keytype, enc_resp, encryptedkeyHandle
   //var keyhandle = encode_ctaphid_request_as_keyhandle(OKCONNECT,  2, null, null, encryptedkeyHandle)
-  var keyhandle = encode_ctaphid_request_as_keyhandle(OKCONNECT, optype, keytype, enc_resp, encryptedkeyHandle)
+  var keyhandle = encode_ctaphid_request_as_keyhandle(cmd, opt1, opt2, opt3, data)
 
   var challenge = Uint8Array.from(crypto.getRandomValues(new Uint8Array(32)));
 
@@ -97,7 +104,7 @@ fido2.getAssertion({
 //         appid: 'https://' + domain
 //       }
     }
-  }, "https://apps.crp.to").catch(function(err){
+  }, "https://apps.crp.to").catch(function(error){
     
     console.warn("ERROR CALLING:", cmd, opt1, opt2, opt3, data);
     console.warn("THE ERROR:", error);
@@ -260,7 +267,7 @@ function encode_ctaphid_request_as_keyhandle(cmd, opt1, opt2, opt3, data) {
   }
 
   // `is_extension_request` expects at least 16 bytes of data
-  const data_pad = /* data.length < 16 ? 16 - data.length : */ 255-data.length-offset;
+  const data_pad = data.length < 16 ? 16 - data.length : 0; // 255-data.length-offset;
   var array = new Uint8Array(offset + data.length + data_pad);
 
   array[0] = cmd & 0xff;
@@ -278,7 +285,7 @@ function encode_ctaphid_request_as_keyhandle(cmd, opt1, opt2, opt3, data) {
 
   array.set(data, offset);
 
-  //console.log('FORMATTED REQUEST:('+array.length+')', toHexString(array));
+  console.log('FORMATTED REQUEST:('+array.length+')', toHexString(array));
   return array;
 }
 

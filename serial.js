@@ -1,4 +1,4 @@
-const hid = require('node-hid');
+const nodeHID = require('node-hid');
 
 bytes2string = function bytes2string(bytes) {
     var ret = Array.from(bytes).map(function chr(c) {
@@ -10,39 +10,42 @@ bytes2string = function bytes2string(bytes) {
 
 wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-var hids = hid.devices();
+var hids = nodeHID.devices();
 
 //console.log(hids)
 
-var hidpath = false;
+var hid = false;
 
 for(var i in hids){
   if(hids[i].product =="ONLYKEY" && hids[i].interface == 3){
-    hidpath = hids[i].path;
+    hid = hids[i];
   }
 }
 
 
-var hidDev = new hid.HID(hidpath);
 
-console.log(hidDev.getDeviceInfo());
-// hidDev.setNonBlocking(1)
-// hidDev.read(console.log);
-// var out
-// while(true){
-//     hidDev.read
-// }
+if(hid){
+	//console.log(hids)
+	var hidDev = new nodeHID.HID(hid.path);
+
+	//console.log("SELECTED",hidDev.getDeviceInfo(),hid);
+	// hidDev.setNonBlocking(1)
+	// hidDev.read(console.log);
+	// var out
+	// while(true){
+	//     hidDev.read
+	// }
 
 
 
-setInterval(function(){
+	setInterval(function(){
 
-    var bfrstr = bytes2string(hidDev.readSync());
-    process.stdout.write(bfrstr)
-    
-},1)
-
-    
-
+		var bfrstr = bytes2string(hidDev.readSync());
+		process.stdout.write(bfrstr)
+		
+	},1)		
+}else{
+	console.log(hids)
+}
 
 //console.log(bytes2string(hidDev.readSync()));

@@ -2,9 +2,9 @@
   "name": "onlykey-fido2",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "serial": "node ./serial.js"
   },
   "repository": {
     "type": "git",
@@ -21,6 +21,8 @@
     "atob": "^2.1.2",
     "btoa": "^1.2.1",
     "node-webcrypto-shim": "0.0.1",
-    "tweetnacl": "^1.0.3"
+    "tweetnacl": "^1.0.3",
+    "xterm": "^4.7.0",
+    "xterm-addon-fit": "^0.4.0"
   }
 }
