@@ -27,9 +27,34 @@
 				fitAddon.fit()
 			});
 			
+			var headers = [
+				"OnlyKey Windows Development Serial Console v0.0.1\r\n"
+			];
+			
+			function header(){
+				for(var i in headers){
+					term.write(headers[i]);
+				}
+			}
+			
+			headers.push('Clear: Ctrl + X\r\n');
+			$(window).keyup(function(e){
+				if(e.ctrlKey && e.key.toLowerCase() == "x"){
+					term.clear();
+					header();
+				}
+			})
+			
+			function clear(){
+				term.clear();
+				header();
+			}
+			
+			clear();
 			$(function(){
 				var script_dir = global.__dirname;
-
+				console.log(script_dir+"node_modules");
+				
 				var cp = spawn("node", "./serial.js");
 
 				cp.stdout.on('data', (data) => {
@@ -54,9 +79,11 @@
 					}
 					var e = args.shift();
 					const { spawn } = require('child_process');
-					const $cp = spawn(e, args,{
-						cwd: script_dir
-					});
+					var env = {
+						cwd: script_dir,
+						NODE_PATH: script_dir+"node_modules\\"
+					};
+					const $cp = spawn(e, args,env);
 					return $cp;
 				}
 			})
