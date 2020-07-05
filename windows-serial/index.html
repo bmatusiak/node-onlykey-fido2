@@ -16,6 +16,7 @@
 		</script>
 
 		<script>
+			/* global $ Terminal */
 			var FitAddon = require("xterm-addon-fit").FitAddon;			
 			var term = new Terminal();
 			const fitAddon = new FitAddon();
@@ -24,7 +25,7 @@
 			
 			fitAddon.fit();
 			$(window).resize(function(){
-				fitAddon.fit()
+				fitAddon.fit();
 			});
 			
 			var headers = [
@@ -37,6 +38,7 @@
 				}
 			}
 			
+			/*
 			headers.push('Clear: Ctrl + X\r\n');
 			$(window).keyup(function(e){
 				if(e.ctrlKey && e.key.toLowerCase() == "x"){
@@ -44,6 +46,7 @@
 					header();
 				}
 			})
+			*/
 			
 			function clear(){
 				term.clear();
@@ -51,14 +54,28 @@
 			}
 			
 			clear();
+			
+			var cp;
+			term.onData(send => {
+				if(send.charCodeAt(0) == 24){ //ctrl+x
+					term.clear();
+					header();
+					return;
+				}
+				term.write(send);
+				cp.stdin.write(send,"utf8",console.log);
+				
+			});
+			
 			$(function(){
 				var script_dir = global.__dirname;
 				console.log(script_dir+"node_modules");
 				
-				var cp = spawn("node", "./serial.js");
-
+				cp = spawn("node", "./serial.js");
+				
+				
 				cp.stdout.on('data', (data) => {
-					data = data.toString('utf8')
+					data = data.toString('utf8');
 					data = data.replace(/\r\n/g, '\r');
 					data = data.replace(/\r/g, '\r\n');
 					term.write(data);
@@ -75,7 +92,7 @@
 				function spawn(){
 					var args = [];
 					for (var i = 0; i < arguments.length; i++) {
-						args.push(arguments[i])
+						args.push(arguments[i]);
 					}
 					var e = args.shift();
 					const { spawn } = require('child_process');
