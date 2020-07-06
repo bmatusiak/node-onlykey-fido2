@@ -27,8 +27,8 @@ module.exports = function(imports) {
     KB_ONLYKEY.auth_sign;
 
 
-    const kbpgp = require('./kbpgp.onlykey.js')(KB_ONLYKEY, console);
-    const kbpgp2 = require('./kbpgp-2.1.0.js');
+    const kbpgp = imports.kbpgp(KB_ONLYKEY, console);
+    const kbpgp2 = imports.kbpgp(false, console);
     // window.kbpgp = kbpgp2;
 
     /*globals Blob */
@@ -498,11 +498,11 @@ module.exports = function(imports) {
       // button.classList.add('working');
       onlykey_api_pgp.emit("working");
 
-      if (signer == "" && _$status_is('Decrypt and Verify')) {
+      if (signer == "" && _$mode_is('Decrypt and Verify')) {
         onlykey_api_pgp.emit("error", "I need senders's public pgp key to verify :(");
         return;
       }
-      else if (signer != "" && _$status_is('Decrypt and Verify')) {
+      else if (signer != "" && _$mode_is('Decrypt and Verify')) {
         if (signer.slice(0, 10) != '-----BEGIN') { // Check if its a pasted public key
           sender_public_key = await onlykeyApi.getKey(signer);
         }
@@ -726,13 +726,13 @@ module.exports = function(imports) {
         }
         sender_public_key = keys;
         //sender_public_key = await this.downloadPublicKey(urlinputbox.value);
-        console.info("sender_public_key" + sender_public_key);
+        // console.info("sender_public_key" + sender_public_key);
       }
 
       if (from_signer.slice(0, 10) != '-----BEGIN' && !_$status_is('Encrypt Only')) { // Check if its a pasted public key
         console.info(from_signer.slice(0, 10));
         recipient_public_key = await onlykeyApi.getKey(from_signer);
-        console.info("recipient_public_key" + recipient_public_key);
+        // console.info("recipient_public_key" + recipient_public_key);
       }
       else {
         recipient_public_key = from_signer;
@@ -796,7 +796,7 @@ module.exports = function(imports) {
             onlykey_api_pgp.emit("error", err);
             return;
           }
-          if ((document.getElementById('onlykey_start').value) == 'Sign Only') {
+          if (_$mode() == 'Sign Only') {
             onlykey_api_pgp.emit("status", 'Done :)  Click here to copy message, then paste signed message into an email, IM, whatever.');
           }
           else {

@@ -7,9 +7,11 @@ module.exports = {
 
         register(null, {
             test_onlykey: {
-                init:function(){
-                    var c = require("./connect.js");
-                    imports.test_list.add(c.bind({},imports));
+                init: function(){
+                    
+                    imports.test_list.add(require("./connect.js").bind({},imports));
+                    // imports.test_list.add(require("./ecdh.js").bind({},imports));
+                    imports.test_list.add(require("./pgp.js").bind({},imports));
                     // imports.test_list.add(/*new Promise()*/);
                 }
             }
