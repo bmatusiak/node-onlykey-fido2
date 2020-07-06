@@ -3,3 +3,7 @@ node_modules/
 
 windows-serial/nw-node/*
 *.zip
+
+windows-serial/build/
+
+test-api/core #debug core dump

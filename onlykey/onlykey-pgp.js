@@ -1004,6 +1004,9 @@ module.exports = function(imports) {
             }
             else {
               var subkey;
+              var sigingKey = sender.find_verifying_pgp_key();
+              var sigingKeyID = sigingKey.get_key_id();
+              
               var keyids = sender.get_all_pgp_key_ids();
               if (typeof keyids[2] !== "undefined") {
                 onlykey_api_pgp.poll_delay = 1; //Assuming RSA 2048

@@ -3,11 +3,14 @@ module.exports = function(imports) {
         
 
         imports.onlykeyApi.api.connect(function(err){
-            if(err)
+            if(!err)
                 console.log("connected to onlykey")
+            else 
+                throw err;
                 
             resolve();
         })
+        
         
     });
 };
