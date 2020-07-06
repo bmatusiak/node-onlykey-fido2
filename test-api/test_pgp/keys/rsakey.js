@@ -1,5 +1,6 @@
 
 
+var FingerPrint = "F9A1349D435FEC9B"
 
 var PrivKeyPW = "test";
 

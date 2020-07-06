@@ -10,28 +10,23 @@ module.exports = function(imports) {
         var rsaKeySet = require("../test_pgp/keys/rsakey.js");
         var ecdhKeySet = require("../test_pgp/keys/ecdhkey.js");
 
-        p2g._$mode("Encrypt and Sign")
-
+        p2g._$mode("Encrypt and Sign");
         p2g.startEncryption(rsaKeySet.PubKey, rsaKeySet.PubKey, testMessage, false /*file*/ , async function(pgp_armored_message) {
-            console.log("ONLYKEYPGP  startEncryption : PASS", pgp_armored_message)
+            if(pgp_armored_message)
+                console.log("ONLYKEYPGP  startEncryption : PASS", pgp_armored_message);
+            else throw new Error("ONLYKEYPGP never give us a message to decrypt");
             
-            var waitLoop = 5;
-            var intver = setInterval(function() {
-                if(waitLoop > 0){ 
-                    console.log("cooldown", waitLoop)
-                    return waitLoop -= 1;
-                }
-                clearInterval(intver);
+            cooldownLOOP(function(){
                 
-                p2g._$mode("Decrypt and Verify")
+                p2g._$mode("Decrypt and Verify");
                 p2g.startDecryption(rsaKeySet.PubKey, pgp_armored_message, false, function(pgp_decrypted_message) {
                     if(pgp_decrypted_message == testMessage)
-                        console.log("ONLYKEY PGP startDecryption : PASS")
-                    else throw new Error("ONLYKEY PGP startDecryption : PASS");
-                    resolve()
+                        console.log("ONLYKEY PGP startDecryption : PASS");
+                    else throw new Error("ONLYKEY PGP startDecryption : FAIL");
+                    resolve();
                 });
 
-            }, 1000 )
+            }, 5);
             
             
         });
@@ -39,4 +34,16 @@ module.exports = function(imports) {
 
 
     });
+    
+    function cooldownLOOP(fn,waitLoop){
+    
+        var intver = setInterval(function() {
+            if(waitLoop > 0){ 
+                console.log("cooldown", waitLoop);
+                return waitLoop -= 1;
+            }
+            clearInterval(intver);
+            fn();
+        }, 1000);
+    }
 };
