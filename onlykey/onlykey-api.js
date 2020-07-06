@@ -91,7 +91,7 @@ module.exports = function(imports) {
       (function(){
         //Set time on OnlyKey, get firmware version, get ecc public
         OK_CONNECT(async function(err, status) {
-          console.log(err);
+          //console.log(err);
           if(status){
             console.log("OKCONNECT STATUS", status);
           }
@@ -210,7 +210,7 @@ module.exports = function(imports) {
             // console.info("AES Key", key);
 
             imports.app.emit("ok-connected");
-            cb(null);
+            //cb(null);
             break;
         }
         cb(null, ctaphid_response.status);
