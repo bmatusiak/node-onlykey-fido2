@@ -157,7 +157,7 @@ module.exports = function(imports) {
           }
         }
         else {
-          console.log(ctaphid_response);
+          // console.log(ctaphid_response);
         }
 
         cb(error, data);
@@ -285,17 +285,13 @@ module.exports = function(imports) {
         }
 
         if (res) {
-          try {
-            res.then(next).catch(aerr => {
-              //             console.log(aerr);
-              //onlykey_api_pgp.emit("error", aerr);
-              //             throw aerr;
-              reject(aerr)
-            });
-          }
-          catch (e) {
-            console.log(e);
-          }
+          res.then(next).catch(aerr => {
+            //             console.log(aerr);
+            //onlykey_api_pgp.emit("error", aerr);
+            //             throw aerr;
+            reject(aerr)
+          });
+        
         }
         else next();
 
