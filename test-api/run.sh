@@ -1,3 +1,3 @@
 node -v
 nvm use 12
-node --inspect
+node --inspect ./index.js
