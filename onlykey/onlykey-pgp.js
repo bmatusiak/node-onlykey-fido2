@@ -137,9 +137,9 @@ module.exports = function(imports) {
                 }
                 data = await aesgcm_decrypt(response, onlykeyApi.sharedsec);
                 // console.log("DECODED RESPONSE:", response);
-                console.log("DECODED RESPONSE(as string):", bytes2string(response));
+                // console.log("DECODED RESPONSE(as string):", bytes2string(response));
                 // console.log("DECRYPTED RESPONSE:", data);
-                console.log("DECRYPTED RESPONSE(as string):", bytes2string(data));
+                // console.log("DECRYPTED RESPONSE(as string):", bytes2string(data));
                 break;
               default:
                 // code
