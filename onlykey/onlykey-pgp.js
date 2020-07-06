@@ -89,7 +89,7 @@ module.exports = function(imports) {
         //await wait(delay * 1000);
         await wait(1000);
         var ctaphid_response = await onlykeyApi.ctaphid_via_webauthn(cmd, 2, null, null, encryptedkeyHandle, 6000, function(aerr, data) {
-          console.log(aerr, data);
+          // console.log(aerr, data);
         });
 
         var response;
@@ -123,7 +123,7 @@ module.exports = function(imports) {
             imports.app.emit("ok-connected");
           }
           else {
-            console.log(ctaphid_response.status);
+            // console.log(ctaphid_response.status);
             switch (ctaphid_response.status) {
               case "CTAP2_ERR_USER_ACTION_PENDING":
               case "CTAP2_ERR_OPERATION_PENDING":
@@ -569,16 +569,16 @@ module.exports = function(imports) {
               onlykey_api_pgp.emit("status", 'Done :) file has no signature, downloading decrypted file ' + filename);
             }
             else {
-              console.log(ds);
+              // console.log(ds);
               var recipient_public_key;
               if (ds) { recipient_public_key = ds.get_key_manager(); }
               if (recipient_public_key) {
-                console.log("Signed by PGP Key");
+                // console.log("Signed by PGP Key");
                 var keyid = recipient_public_key.get_pgp_fingerprint().toString('hex').toUpperCase();
                 keyid = keyid.slice(24, 40);
                 var userid = recipient_public_key.userids[0].components.email.split("@")[0];
-                console.log(keyid);
-                console.log(userid);
+                // console.log(keyid);
+                // console.log(userid);
                 onlykey_api_pgp.emit("status", 'Done :) Signed by ' + userid + ' (Key ID: ' + keyid + '), downloading decrypted file ' + filename);
               }
             }
