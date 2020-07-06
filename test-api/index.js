@@ -35,4 +35,4 @@ architect.createApp(tests, function(err, app) {
 });
 }
 
-module.exports();
+// module.exports();
