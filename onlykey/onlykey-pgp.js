@@ -461,15 +461,15 @@ module.exports = function(imports) {
               onlykey_api_pgp.emit("status", "Done :) Message has no signature, Click here to copy message");
             }
             else {
-              console.log(ds);
+              // console.log(ds);
               if (ds) { recipient_public_key = ds.get_key_manager(); }
               if (recipient_public_key) {
-                console.log("Signed by PGP Key");
+                // console.log("Signed by PGP Key");
                 var keyid = recipient_public_key.get_pgp_fingerprint().toString('hex').toUpperCase();
                 keyid = keyid.slice(24, 40);
                 var userid = recipient_public_key.userids[0].components.email.split("@")[0];
-                console.log(keyid);
-                console.log(userid);
+                // console.log(keyid);
+                // console.log(userid);
                 onlykey_api_pgp.emit("status", "Done :) Signed by " + userid + " (Key ID: " + keyid + "), Click here to copy message");
               }
             }
@@ -948,7 +948,7 @@ module.exports = function(imports) {
           // }
           var padded_ct = ct.slice(12, ct.length);
           var keyid = ct.slice(1, 8);
-          console.info("Key ID bytes", Array.from(keyid));
+          // console.info("Key ID bytes", Array.from(keyid));
           var pin_hash = sha256(padded_ct);
           // console.info("Padded CT Packet bytes", Array.from(padded_ct));
           pin = [get_pin(pin_hash[0]), get_pin(pin_hash[15]), get_pin(pin_hash[31])];
