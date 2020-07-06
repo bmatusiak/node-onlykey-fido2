@@ -467,7 +467,7 @@ module.exports = function(imports) {
       if (newMode) {
         _mode = newMode;
         // onlykey_api_pgp.emit("mode-"+newMode);
-        // console.info("Changed _status to ", newStatus);
+        console.info("Changed _status to ", newMode);
       }
       return _mode;
     }
@@ -729,7 +729,7 @@ module.exports = function(imports) {
         // console.info("sender_public_key" + sender_public_key);
       }
 
-      if (from_signer.slice(0, 10) != '-----BEGIN' && !_$status_is('Encrypt Only')) { // Check if its a pasted public key
+      if (from_signer.slice(0, 10) != '-----BEGIN' && !_$mode_is('Encrypt Only')) { // Check if its a pasted public key
         console.info(from_signer.slice(0, 10));
         recipient_public_key = await onlykeyApi.getKey(from_signer);
         // console.info("recipient_public_key" + recipient_public_key);

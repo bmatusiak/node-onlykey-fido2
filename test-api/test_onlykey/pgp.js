@@ -14,8 +14,15 @@ module.exports = function(imports) {
 
         p2g.startEncryption(rsaKeySet.PubKey, rsaKeySet.PubKey, testMessage, false /*file*/ , async function(pgp_armored_message) {
             console.log("ONLYKEYPGP  startEncryption : PASS", pgp_armored_message)
-            setTimeout(function() {
-
+            
+            var waitLoop = 5;
+            var intver = setInterval(function() {
+                if(waitLoop > 0){ 
+                    console.log("cooldown", waitLoop)
+                    return waitLoop -= 1;
+                }
+                clearInterval(intver);
+                
                 p2g._$mode("Decrypt and Verify")
                 p2g.startDecryption(rsaKeySet.PubKey, pgp_armored_message, false, function(pgp_decrypted_message) {
                     if(pgp_decrypted_message == testMessage)
@@ -25,6 +32,8 @@ module.exports = function(imports) {
                 });
 
             }, 1000 )
+            
+            
         });
 
 
