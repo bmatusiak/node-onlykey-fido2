@@ -6,4 +6,5 @@ windows-serial/nw-node/*
 
 windows-serial/build/
 
-test-api/core #debug core dump
+# debug core dump
+test-api/core

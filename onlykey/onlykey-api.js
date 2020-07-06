@@ -144,7 +144,7 @@ module.exports = function(imports) {
 
 
       //setTimeout(async function() {
-      console.info("Connecting to OnlyKey");
+      //console.info("Connecting to OnlyKey");
       var cmd;
       var encryptedkeyHandle;
       var message;
@@ -564,7 +564,7 @@ module.exports = function(imports) {
       // return 
 
       var results = false;
-      console.log("REQUEST:", request_options);
+      //console.log("REQUEST:", request_options);
       window.navigator.credentials.get({
         publicKey: request_options
       }).catch(error => {
@@ -605,7 +605,7 @@ module.exports = function(imports) {
           // console.log("GOT ASSERTION", assertion);
           // console.log("RESPONSE", assertion.response);
           response = decode_ctaphid_response_from_signature(assertion.response);
-          console.log("RESPONSE:", response);
+          //console.log("RESPONSE:", response);
         }
         if (cb) cb(response.error, response);
         resolve(response);

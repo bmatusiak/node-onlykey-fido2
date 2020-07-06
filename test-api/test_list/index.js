@@ -11,11 +11,15 @@ module.exports = {
             test_list.push(item);
         };
         TESTLIST.init = function() {
-
+            
+            
+            
             imports.app.on("start", async function() {
+                console.log("Starting Tests");
                 for(var i in test_list){
                     await test_list[i]();
                 }
+                console.log("Finished Tests");
             });
             
         };

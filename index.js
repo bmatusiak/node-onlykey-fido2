@@ -1,5 +1,4 @@
 //debugger;
-delete require.cache[__dirname+"/index.js"]; //require("./index.js")
 
 const crypto = require('node-webcrypto-shim');
 const atob = require("atob");
