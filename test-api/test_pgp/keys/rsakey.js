@@ -1,10 +1,9 @@
-
-
-var FingerPrint = "F9A1349D435FEC9B"
-
-var PrivKeyPW = "test";
-
-var PrivKey = `-----BEGIN PGP PRIVATE KEY BLOCK-----
+module.exports = (function() {
+  var keyDescription = {
+    FingerPrint: "F9A1349D435FEC9B",
+    KeySize: "",
+    PrivKeyPW: "test",
+    PrivKey: (`-----BEGIN PGP PRIVATE KEY BLOCK-----
 Version: Keybase OpenPGP v2.1.0
 Comment: https://keybase.io/crypto
 
@@ -136,9 +135,8 @@ LM8VW33j68B64k1fsjxgamZIjxA2ooYHJN3yEGJ1VZPo+MqQtXxBl1nvIsZO2VD6
 3HHQtKI3gEBooPY7CtFnOQbe7GkZPreiy8xW1nR66VMbKS6uZ5r1Klgf9Hm/90Me
 YWj6+apV6hFQhxXH4ywtu+QmrvNh4SoGmK8=
 =osWZ
------END PGP PRIVATE KEY BLOCK-----`
-
-var PubKey = `-----BEGIN PGP PUBLIC KEY BLOCK-----
+-----END PGP PRIVATE KEY BLOCK-----`),
+    PubKey: (`-----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: Keybase OpenPGP v2.1.0
 Comment: https://keybase.io/crypto
 
@@ -213,11 +211,8 @@ oqcIUzkszxVbfePrwHriTV+yPGBqZkiPEDaihgck3fIQYnVVk+j4ypC1fEGXWe8i
 xk7ZUPrccdC0ojeAQGig9jsK0Wc5Bt7saRk+t6LLzFbWdHrpUxspLq5nmvUqWB/0
 eb/3Qx5haPr5qlXqEVCHFcfjLC275Cau82HhKgaYrw==
 =Kk6S
------END PGP PUBLIC KEY BLOCK-----`
+-----END PGP PUBLIC KEY BLOCK-----`)
+  };
 
-
-module.exports = {
-  PrivKeyPW:PrivKeyPW,
-  PrivKey:PrivKey,
-  PubKey:PubKey
-}
+  return keyDescription;
+})();

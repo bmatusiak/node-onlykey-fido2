@@ -2,24 +2,34 @@
 
 http://onlykey.io/sea
 
+
+#### requirments
+---
+
+* node >= v12
+* libusb libudev
+
 ------
 
-Developer Serial Monitor
+#### Developer Serial Monitor
 ---
 
-Fido2 testing suite
+This provides no help when debugging only key production.
+
+#### Fido2 testing suite
 ---
 
-This is a 3rd Party API for onlykey
+
+# This is a 3rd Party API for onlykey
 ---
 
-Supports
+#### Supports
 * NACL
 * ECDH and ECDSA (p256)
 * CURVE25519
 
 
-API
+## API
 ----
 
 ```js
