@@ -127,7 +127,7 @@ module.exports = function(imports) {
             switch (ctaphid_response.status) {
               case "CTAP2_ERR_USER_ACTION_PENDING":
               case "CTAP2_ERR_OPERATION_PENDING":
-                
+
                 _$status('pending_challenge')
                 // code
                 break;
@@ -192,7 +192,7 @@ module.exports = function(imports) {
       var encryptedmsg = await aesgcm_encrypt(message, onlykeyApi.sharedsec);
 
       var cmd = _$mode_is('Encrypt and Sign') ? OKSIGN : OKDECRYPT;
-      var opt1 = _$mode_is('Encrypt and Sign') ?  (KB_ONLYKEY.is_ecc ? 102 : 2)  : (KB_ONLYKEY.is_ecc ? 101 : 1) ;
+      var opt1 = _$mode_is('Encrypt and Sign') ? (KB_ONLYKEY.is_ecc ? 102 : 2) : (KB_ONLYKEY.is_ecc ? 101 : 1);
       //ecc load to slots 101 and 102 on Onlykey
       var opt2 = finalPacket;
       var opt3 = packetnum;
@@ -227,8 +227,9 @@ module.exports = function(imports) {
         // console.log("DECODED RESPONSE(as string):", bytes2string(response));
         // console.log("DECRYPTED RESPONSE:", decryptedparsedData);
         // console.log("DECRYPTED RESPONSE(as string):", bytes2string(decryptedparsedData));
-      }else if(ctaphid_response.error){
-          return onError(ctaphid_response.error);
+      }
+      else if (ctaphid_response.error) {
+        return onError(ctaphid_response.error);
       }
       // console.log("Returning just the decoded response:");
       var result = response;
@@ -294,7 +295,7 @@ module.exports = function(imports) {
             //             throw aerr;
             reject(aerr)
           });
-        
+
         }
         else next();
 
@@ -394,7 +395,7 @@ module.exports = function(imports) {
 
       onlykey_api_pgp.poll_type = 3;
       onlykey_api_pgp.poll_delay = 1;
-      //console.info(onlykey_api_pgp.poll_type);
+      console.info("Setting poll_type",onlykey_api_pgp.poll_type);
       // button.classList.remove('error');
       // button.classList.add('working');
       onlykey_api_pgp.emit("working");
@@ -595,7 +596,7 @@ module.exports = function(imports) {
     onlykey_api_pgp.startEncryption = async function(to_pgpkeys, from_signer, message, file, callback) {
       onlykey_api_pgp.emit("working");
       onlykey_api_pgp.poll_type = 4;
-      console.info(onlykey_api_pgp.poll_type);
+      console.info("Setting poll_type",onlykey_api_pgp.poll_type);
       var r_inputs, keys;
 
       var sender_public_key, recipient_public_key;
@@ -877,7 +878,7 @@ module.exports = function(imports) {
       KB_ONLYKEY.is_ecc = false;
 
       const kbpgp = imports.kbpgp(KB_ONLYKEY, console);
-      
+
       /**
        * Decrypt ciphertext via OnlyKey
        * @param {Array} ct
@@ -974,7 +975,7 @@ module.exports = function(imports) {
         //console.info("Generated PIN", pin);
         return u2fSignBuffer(typeof ct === 'string' ? ct.match(/.{2}/g) : ct, cb, reject, KB_ONLYKEY);
       };
-      
+
       /**
        * Sign message via OnlyKey PGP ECC key
        * @param {Array} ct 
@@ -1071,14 +1072,15 @@ module.exports = function(imports) {
           //detect ecc or rsa
           key;
           var decodedKey = imports.pgpDecoder(key)
-          if(decodedKey[0].publicKeyAlgorithm && decodedKey[0].publicKeyAlgorithm.toString() == "RSA (Encrypt or Sign) (0x1)"|| 
-             decodedKey[0].algorithm && decodedKey[0].algorithm.toString() == "RSA (Encrypt or Sign) (0x1)"){
-                testKey = onlykey_api_pgp.test_pgp_key_rsa()
-                passphrase = 'test123';
-          }else{
-                KB_ONLYKEY.is_ecc = true;
-                testKey = onlykey_api_pgp.test_pgp_key_ecc();
-                passphrase = 'G2SaK_v[ST_hS,-z';
+          if (decodedKey[0].publicKeyAlgorithm && decodedKey[0].publicKeyAlgorithm.toString() == "RSA (Encrypt or Sign) (0x1)" ||
+            decodedKey[0].algorithm && decodedKey[0].algorithm.toString() == "RSA (Encrypt or Sign) (0x1)") {
+            testKey = onlykey_api_pgp.test_pgp_key_rsa()
+            passphrase = 'test123';
+          }
+          else {
+            KB_ONLYKEY.is_ecc = true;
+            testKey = onlykey_api_pgp.test_pgp_key_ecc();
+            passphrase = 'G2SaK_v[ST_hS,-z';
           }
 
           kbpgp.KeyManager.import_from_armored_pgp({

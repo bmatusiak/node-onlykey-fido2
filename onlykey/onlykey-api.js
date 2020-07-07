@@ -220,9 +220,9 @@ module.exports = function(imports) {
 
     });
   }
-  
-  
-  
+
+
+
   onlykey_api.check = async function(callback) {
     return new Promise(async function(resolve) {
       if (onlykey_api.init) {
@@ -234,17 +234,17 @@ module.exports = function(imports) {
       (function() {
         //Set time on OnlyKey, get firmware version, get ecc public
         OK_CHECK(async function(err, status) {
-          if(err) 
+          if (err)
             callback(err);
           else callback(null, status);
-            
-            
+
+
         });
       })();
 
     });
   };;
-  
+
   async function OK_CHECK(callback) {
     return new Promise(async function(resolve, reject) {
 
@@ -261,20 +261,20 @@ module.exports = function(imports) {
 
       //setTimeout(async function() {
       console.info("Checking OnlyKey");
-      
+
       imports.app.emit("ok-connecting");
 
-      
+
       appKey = nacl.box.keyPair();
       // console.info(appKey);
       // console.info(appKey.publicKey);
       // console.info(appKey.secretKey);
       // console.info("Application ECDH Public Key: ", appKey.publicKey);
-      
+
       var cmd = OKCONNECT;
-      
+
       var message = ctaphid_custom_message_header(appKey.publicKey, cmd)
-      
+
       var encryptedkeyHandle = Uint8Array.from(message); // Not encrypted as this is the initial key exchange
 
 
@@ -329,24 +329,24 @@ module.exports = function(imports) {
 
     });
   }
-  
-  
+
+
   function ctaphid_custom_message_header(publicKey, CMD) {
-      var message = [255, 255, 255, 255, CMD];
+    var message = [255, 255, 255, 255, CMD];
 
-      //Add current epoch time
-      var currentEpochTime = Math.round(new Date().getTime() / 1000.0).toString(16);
-      var timePart = currentEpochTime.match(/.{2}/g).map(hexStrToDec);
-      Array.prototype.push.apply(message, timePart);
+    //Add current epoch time
+    var currentEpochTime = Math.round(new Date().getTime() / 1000.0).toString(16);
+    var timePart = currentEpochTime.match(/.{2}/g).map(hexStrToDec);
+    Array.prototype.push.apply(message, timePart);
 
-      //Add transit pubkey
-      Array.prototype.push.apply(message, publicKey);
+    //Add transit pubkey
+    Array.prototype.push.apply(message, publicKey);
 
-      //Add Browser and OS codes
-      var env = [onlykey_api.browser.charCodeAt(0), onlykey_api.os.charCodeAt(0)];
-      Array.prototype.push.apply(message, env);
+    //Add Browser and OS codes
+    var env = [onlykey_api.browser.charCodeAt(0), onlykey_api.os.charCodeAt(0)];
+    Array.prototype.push.apply(message, env);
 
-      return message;
+    return message;
   }
 
   // The idea is to encode CTAPHID_VENDOR commands
@@ -630,7 +630,7 @@ module.exports = function(imports) {
     });
 
   }
-  
+
   onlykey_api.ctaphid_custom_message_header = ctaphid_custom_message_header;
   onlykey_api.encode_ctaphid_request_as_keyhandle = encode_ctaphid_request_as_keyhandle;
   onlykey_api.decode_ctaphid_response_from_signature = decode_ctaphid_response_from_signature;
