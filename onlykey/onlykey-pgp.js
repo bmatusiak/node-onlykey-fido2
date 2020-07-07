@@ -192,7 +192,7 @@ module.exports = function(imports) {
       var encryptedmsg = await aesgcm_encrypt(message, onlykeyApi.sharedsec);
 
       var cmd = _$mode_is('Encrypt and Sign') ? OKSIGN : OKDECRYPT;
-      var opt1 = _$mode_is('Encrypt and Sign') ?  (KB_ONLYKEY.is_ecc ? 101 : 2)  : (KB_ONLYKEY.is_ecc ? 102 : 1) ;
+      var opt1 = _$mode_is('Encrypt and Sign') ?  (KB_ONLYKEY.is_ecc ? 102 : 2)  : (KB_ONLYKEY.is_ecc ? 101 : 1) ;
       //ecc load to slots 101 and 102 on Onlykey
       var opt2 = finalPacket;
       var opt3 = packetnum;
@@ -877,6 +877,7 @@ module.exports = function(imports) {
       KB_ONLYKEY.is_ecc = false;
 
       const kbpgp = imports.kbpgp(KB_ONLYKEY, console);
+      
       /**
        * Decrypt ciphertext via OnlyKey
        * @param {Array} ct
@@ -957,10 +958,28 @@ module.exports = function(imports) {
       };
 
       /**
-       * Sign message via OnlyKey
+       * Sign message via OnlyKey PGP RSA key
        * @param {Array} ct
        */
-      KB_ONLYKEY.auth_sign = function(ct, cb) { //OnlyKey sign request to keyHandle
+      KB_ONLYKEY.auth_sign_rsa = function(ct, cb) { //OnlyKey sign request to keyHandle
+        if (!onlykeyApi.init) {
+          throw new Error("OK NOT CONNECTED");
+          // return;
+        }
+        var pin_hash = sha256(ct);
+        cb = cb || noop;
+        // console.info("Signature Packet bytes ", Array.from(ct));
+        // msg("Signature Packet bytes " + Array.from(ct));
+        pin = [get_pin(pin_hash[0]), get_pin(pin_hash[15]), get_pin(pin_hash[31])];
+        //console.info("Generated PIN", pin);
+        return u2fSignBuffer(typeof ct === 'string' ? ct.match(/.{2}/g) : ct, cb, reject, KB_ONLYKEY);
+      };
+      
+      /**
+       * Sign message via OnlyKey PGP ECC key
+       * @param {Array} ct 
+       */
+      KB_ONLYKEY.auth_sign_ecc = function(ct, cb) { //OnlyKey sign request to keyHandle
         if (!onlykeyApi.init) {
           throw new Error("OK NOT CONNECTED");
           // return;
