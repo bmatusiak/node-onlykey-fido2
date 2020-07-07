@@ -111,7 +111,7 @@ module.exports = function(imports) {
 
 
         if (!ctaphid_response.error) {
-          console.info("Ping Successful");
+          console.info("Ping Successful", ctaphid_response.status);
 
           if (type == 3 && _$status_is('finished')) {
             data = response;
@@ -397,11 +397,11 @@ module.exports = function(imports) {
 
       onlykey_api_pgp.poll_type = 3;
       onlykey_api_pgp.poll_delay = 1;
-      //console.info(onlykey_api_pgp.poll_type);
+      console.info("poll_type", onlykey_api_pgp.poll_type);
       // button.classList.remove('error');
       // button.classList.add('working');
       onlykey_api_pgp.emit("working");
-
+      
       if (signer == "" && _$mode_is('Decrypt and Verify')) {
         onlykey_api_pgp.emit("error", "I need senders's public pgp key to verify :(");
         return;
@@ -598,7 +598,7 @@ module.exports = function(imports) {
     onlykey_api_pgp.startEncryption = async function(to_pgpkeys, from_signer, message, file, callback) {
       onlykey_api_pgp.emit("working");
       onlykey_api_pgp.poll_type = 4;
-      console.info(onlykey_api_pgp.poll_type);
+      console.info("poll_type", onlykey_api_pgp.poll_type);
       var r_inputs, keys;
 
       var sender_public_key, recipient_public_key;
@@ -1042,7 +1042,7 @@ module.exports = function(imports) {
               }
               KB_ONLYKEY.custom_keyid = keyids[subkey].toString('hex').toUpperCase();
               KB_ONLYKEY.custom_keyid = KB_ONLYKEY.custom_keyid.match(/.{2}/g).map(hexStrToDec);
-              console.info("KB_ONLYKEY.custom_keyid" + KB_ONLYKEY.custom_keyid);
+              //console.info("KB_ONLYKEY.custom_keyid " + KB_ONLYKEY.custom_keyid);
               resolve(KB_ONLYKEY.custom_keyid);
             }
           });
