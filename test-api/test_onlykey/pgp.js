@@ -9,9 +9,10 @@ module.exports = function(imports) {
 
         var rsaKeySet = require("../test_pgp/keys/rsakey.js");
         var ecdhKeySet = require("../test_pgp/keys/ecdhkey.js");
+        var eccKeySet =   require("../test_pgp/keys/ecckey.js");
 
         p2g._$mode("Encrypt and Sign");
-        p2g.startEncryption(rsaKeySet.PubKey, rsaKeySet.PubKey, testMessage, false /*file*/ , async function(err, pgp_armored_message) {
+        p2g.startEncryption(eccKeySet.PubKey, eccKeySet.PubKey, testMessage, false /*file*/ , async function(err, pgp_armored_message) {
             if (!err && !pgp_armored_message)
                 throw new Error("ONLYKEYPGP never give us a message to decrypt");
             else if (err)
@@ -23,7 +24,7 @@ module.exports = function(imports) {
             cooldownLOOP(function() {
 
                 p2g._$mode("Decrypt and Verify");
-                p2g.startDecryption(rsaKeySet.PubKey, pgp_armored_message, false, function(err, pgp_decrypted_message) {
+                p2g.startDecryption(eccKeySet.PubKey, pgp_armored_message, false, function(err, pgp_decrypted_message) {
                     if (!err && !pgp_armored_message)
                         throw new Error("ONLYKEYPGP never give us a unencrypted message");
                     else if (err)

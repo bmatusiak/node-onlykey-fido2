@@ -5,8 +5,9 @@ module.exports = function(kbpgp) {
     var testMessage = "The quick brown fox jumps over the lazy dog";
 
 
-    var rsaKeySet = require("./keys/rsakey.js");
-    var ecdhKeySet = require("./keys/ecdhkey.js");
+    var rsaKeySet =   false;  //require("./keys/rsakey.js");
+    var ecdhKeySet =  false;  //require("./keys/ecdhkey.js");
+    var eccKeySet =   require("./keys/ecckey.js");
 
     var act;
 
@@ -90,6 +91,56 @@ module.exports = function(kbpgp) {
     }
 
     await bobTest;
+    
+    
+    if (false) { //bob
+      //ecc  -- this will be a bit faster
+      kbpgp.KeyManager.generate_ecc({ userid: "bob <user@example.com>" }, function(err, bob) {
+        if (err) throw err;
+        bob.sign({}, function(err) {
+          if (err) throw err;
+          console.log("bob done!");
+          bob.export_pgp_private({
+            passphrase: 'test'
+          }, function(err, pgp_private) {
+            if (err) throw err;
+            console.log("private key: ", pgp_private);
+          });
+          bob.export_pgp_public({}, function(err, pgp_public) {
+            if (err) throw err;
+            console.log("public key: ", pgp_public);
+          });
+          //act.start(bob);
+        });
+      });
+    }
+    else if (eccKeySet) {
+
+      /*
+      var bobkeySet = require("./bobkey.js");
+      act.loadPrivKey(bobkeySet, function(bob) {
+        act.loadPubKey(bobkeySet, function(bob_pub) {
+          act.start(bob, bob_pub);
+        });
+      });
+      */
+
+      var charlieTest = new Promise(async function(resolve) {
+
+
+        act = loadAct(eccKeySet, null, "ecc");
+        act.loadPrivKey(function(privKey) {
+          act.loadPubKey(function(pubKey) {
+            act.start(privKey, pubKey, resolve);
+          });
+        });
+
+      });
+    }
+
+    await charlieTest;
+    
+    
     
     resolve();
 
