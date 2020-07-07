@@ -2884,8 +2884,10 @@
         });
       })(this)((function(_this) {
         return function() {
+          if(!onlykey){
           r = sig[0], s = sig[1];
           return cb(null, Buffer.concat([uint_to_buffer(16, r.length * 8), r, uint_to_buffer(16, s.length * 8), s]));
+          }
         };
       })(this));
     };

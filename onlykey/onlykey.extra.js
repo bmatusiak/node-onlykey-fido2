@@ -272,8 +272,9 @@ module.exports = function(imports) {
       cipher.update(forge.util.createBuffer(Uint8Array.from(plaintext)));
       cipher.finish();
       var ciphertext = cipher.output;
-      ciphertext = ciphertext.toHex(),
-        resolve(ciphertext.match(/.{2}/g).map($exports.hexStrToDec));
+      ciphertext = ciphertext.toHex();
+      var res = ciphertext.match(/.{2}/g).map($exports.hexStrToDec)
+      resolve(res);
     });
   };
 
