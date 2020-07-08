@@ -541,7 +541,7 @@ module.exports = function(imports) {
         var keyStore = pgpkeyStore(reject);
         switch (_$mode()) {
           case 'Decrypt and Verify':
-            await keyStore.loadPublic(key);
+            await keyStore.loadPublic(key1);
             onlykey_api_pgp.emit("status", "Decrypting and verifying...");
             break;
           case 'Decrypt Only':
