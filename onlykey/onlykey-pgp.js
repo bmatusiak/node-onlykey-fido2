@@ -419,6 +419,7 @@ module.exports = function(imports) {
         else await decryptFile(sender_public_key, file, done);
       }
       catch (e) {
+        onlykey_api_pgp.emit("error", e);
         callback(e);
       }
     };
@@ -651,6 +652,7 @@ module.exports = function(imports) {
         else await encryptFile(sender_public_key, recipient_public_key, file, done);
       }
       catch (e) {
+        onlykey_api_pgp.emit("error", e);
         callback(e);
       }
     };
