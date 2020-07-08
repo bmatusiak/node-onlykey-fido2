@@ -18,7 +18,7 @@ module.exports = function(imports) {
         
         var eccKeySet =   require("../test_pgp/keys/ecckey.js");
 
-        var onlykeyPubKey = `-----BEGIN PGP PUBLIC KEY BLOCK-----
+        var onlykeyPubKey = (`-----BEGIN PGP PUBLIC KEY BLOCK-----
 Comment: https://keybase.io/download
 Version: Keybase Go 5.1.1 (linux)
 
@@ -70,33 +70,36 @@ nob4It/6Ssm/1KXljXPq6VseLvU7TQjymBQ2SW4Pq1hqjRKnFXWQYC+9y18iiG6+
 ABSNZIEwvsPwVcdA4cixfsSYlavVWFjpwJ/mY9s+vxjAiphTqSS79WBvuH1qi5Gr
 KdC7XnwBKVcoo3k1qdTej/nQY2iOZNzjkmC/
 =jUa0
------END PGP PUBLIC KEY BLOCK-----`;
+-----END PGP PUBLIC KEY BLOCK-----`);
 
         p2g._$mode("Encrypt and Sign");
         p2g.startEncryption(onlykeyPubKey, onlykeyPubKey, testMessage, false /*file*/ , async function(err, pgp_armored_message) {
             if (!err && !pgp_armored_message)
                 return reject("ONLYKEYPGP never give us a message to decrypt");
             else if (err)
-                return reject("TEST:ONLYKEYPGP " + err);
+                return reject("TEST:ONLYKEYPGP startEncryption:err: " + err);
             else
-                console.log("ONLYKEYPGP  startEncryption : PASS", pgp_armored_message);
+                console.log("ONLYKEYPGP  startEncryption : PASS\r\n", testMessage, pgp_armored_message);
 
 
-            cooldownLOOP(function() {
+            cooldownLOOP(async function() {
+                await p2g.check();
+                cooldownLOOP(function() {
 
-                p2g._$mode("Decrypt and Verify");
-                p2g.startDecryption(onlykeyPubKey, onlykeyPubKey, pgp_armored_message, false, function(err, pgp_decrypted_message) {
-                    if (!err && !pgp_armored_message)
-                        return reject("ONLYKEYPGP never give us a unencrypted message");
-                    else if (err)
-                        return reject("TEST:ONLYKEYPGP " + err);
-                    else
-                    if (pgp_decrypted_message == testMessage)
-                        console.log("ONLYKEY PGP startDecryption : PASS");
-                    else return reject("ONLYKEY PGP startDecryption : FAIL");
-                    resolve();
-                });
+                    p2g._$mode("Decrypt and Verify");
+                    p2g.startDecryption(onlykeyPubKey, onlykeyPubKey, pgp_armored_message, false, function(err, pgp_decrypted_message) {
+                        if (!err && !pgp_decrypted_message)
+                            return reject("ONLYKEYPGP never give us a unencrypted message");
+                        else if (err)
+                            return reject("TEST:ONLYKEYPGP " + err);
+                        else
+                        if (pgp_decrypted_message == testMessage)
+                            console.log("ONLYKEY PGP startDecryption : PASS");
+                        else return reject("ONLYKEY PGP startDecryption : FAIL");
+                        resolve();
+                    });
 
+                }, 5);
             }, cooldown_between_calls);
 
 
