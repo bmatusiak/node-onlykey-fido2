@@ -565,6 +565,7 @@ module.exports = function(imports) {
 
       var results = false;
       //console.log("REQUEST:", request_options);
+      wait(100);
       window.navigator.credentials.get({
         publicKey: request_options
       }).catch(error => {

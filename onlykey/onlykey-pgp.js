@@ -484,7 +484,7 @@ module.exports = function(imports) {
       });
     }
 
-    function decryptFile(key1, ct, callback) {
+    function decryptFile(key1, key2, ct, callback) {
       return new Promise(async(resolve, reject) => {
         
         var keyStore = pgpkeyStore(reject);
@@ -550,7 +550,7 @@ module.exports = function(imports) {
             break;
           default:
         }
-        await keyStore.loadPrivate();
+        await keyStore.loadPrivate(key2);
         keyStore.kbpgp.unbox({
           keyfetch: keyStore.ring,
           raw: buffer,
@@ -650,10 +650,13 @@ module.exports = function(imports) {
         recipient_public_key = from_signer;
       }
       var done = function(msg) { callback(null, msg) };
-      var error = function(msg) { callback(msg);   onlykey_api_pgp.emit("error", msg); };
+      var error = function(msg) { 
+        callback(msg);   
+        //return onlykey_api_pgp.emit("error", msg); 
+      };
       
-        if (message != null) await encryptText(sender_public_key, recipient_public_key, message, done).catch(error);
-        else await encryptFile(sender_public_key, recipient_public_key, file, done).catch(error);
+        if (message != null) encryptText(sender_public_key, recipient_public_key, message, done).catch(error);
+        else encryptFile(sender_public_key, recipient_public_key, file, done).catch(error);
 
 
       
