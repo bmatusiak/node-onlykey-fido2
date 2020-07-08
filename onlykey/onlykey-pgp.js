@@ -650,14 +650,13 @@ module.exports = function(imports) {
         recipient_public_key = from_signer;
       }
       var done = function(msg) { callback(null, msg) };
-      try {
-        if (message != null) await encryptText(sender_public_key, recipient_public_key, message, done);
-        else await encryptFile(sender_public_key, recipient_public_key, file, done);
-      }
-      catch (e) {
-        onlykey_api_pgp.emit("error", e);
-        callback(e);
-      }
+      var error = function(msg) { callback(msg);   onlykey_api_pgp.emit("error", msg); };
+      
+        if (message != null) await encryptText(sender_public_key, recipient_public_key, message, done).catch(error);
+        else await encryptFile(sender_public_key, recipient_public_key, file, done).catch(error);
+
+
+      
     };
 
     async function encryptText(key1, key2, msg, callback) {
