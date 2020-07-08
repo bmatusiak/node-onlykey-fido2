@@ -390,7 +390,7 @@ module.exports = function(imports) {
       return statusEvents;
     };
 
-    onlykey_api_pgp.startDecryption = async function(signer, message, file, callback) {
+    onlykey_api_pgp.startDecryption = async function(signer, my_public_key, message, file, callback) {
       var sender_public_key;
 
       onlykey_api_pgp.poll_type = 3;
@@ -415,8 +415,8 @@ module.exports = function(imports) {
       var done = function(msg) { callback(null, msg) };
       try {
         if (message != null)
-          await decryptText(sender_public_key, message, done);
-        else await decryptFile(sender_public_key, file, done);
+          await decryptText(sender_public_key,my_public_key, message, done);
+        else await decryptFile(sender_public_key, my_public_key, file, done);
       }
       catch (e) {
         onlykey_api_pgp.emit("error", e);
@@ -424,13 +424,13 @@ module.exports = function(imports) {
       }
     };
 
-    function decryptText(key, encryptedMessage, callback) {
+    function decryptText(key1, key2, encryptedMessage, callback) {
       return new Promise(async(resolve, reject) => {
 
         var keyStore = pgpkeyStore(reject);
         switch (_$mode()) {
           case 'Decrypt and Verify':
-            await keyStore.loadPublic(key);
+            await keyStore.loadPublic(key1);
             onlykey_api_pgp.emit("status", "Decrypting and verifying message ...");
             break;
           case 'Decrypt Only':
@@ -439,7 +439,7 @@ module.exports = function(imports) {
             break;
           default:
         }
-        await keyStore.loadPrivate(encryptedMessage);
+        await keyStore.loadPrivate(key2);
         keyStore.kbpgp.unbox({
           keyfetch: keyStore.ring,
           armored: encryptedMessage,
@@ -484,8 +484,11 @@ module.exports = function(imports) {
       });
     }
 
-    function decryptFile(key, ct, callback) {
+    function decryptFile(key1, ct, callback) {
       return new Promise(async(resolve, reject) => {
+        
+        var keyStore = pgpkeyStore(reject);
+        
         var txt = "";
         if ('files' in ct) {
           var file = ct.files[0];
