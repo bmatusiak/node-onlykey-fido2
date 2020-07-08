@@ -12,7 +12,7 @@ module.exports = {
         const onlykeyPGP = require('./onlykey/onlykey-pgp.js')(imports);
         const onlykey3rd = require('./onlykey/onlykey-3rd-party.js')(imports, onlykeyApi);
         
-        if(window.navigator.userAgent != "NODE"){
+        if(imports.window.navigator.userAgent != "NODE"){
             const request = require('superagent');
             var getKey = function getKey(url, statusFn_force) {
                 var statusFn, force;
