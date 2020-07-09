@@ -36,9 +36,9 @@ module.exports = function(imports) {
 
     onlykey_api_pgp.check = onlykeyApi.check.bind();
 
-    const OKDECRYPT = 240;
-    const OKSIGN = 237;
-    const OKPING = 243;
+    const OKDECRYPT = onlykeyApi.getCMD('OKDECRYPT');
+    const OKSIGN = onlykeyApi.getCMD('OKSIGN');
+    const OKPING = onlykeyApi.getCMD('OKPING');
 
     var _status;
     var _mode;
@@ -46,7 +46,7 @@ module.exports = function(imports) {
 
     function ping(delay) {
       console.info("PING: poll_type=" + onlykey_api_pgp.poll_type + ", delay=" + (delay || onlykey_api_pgp.poll_delay));
-      var p = msg_polling({ type: onlykey_api_pgp.poll_type, delay: delay });
+      var p = msg_polling({ type: onlykey_api_pgp.poll_type, delay: delay || 1 });
       return p;
     }
 
@@ -137,9 +137,9 @@ module.exports = function(imports) {
                   _$status('done_challenge');
                 }
                 data = await aesgcm_decrypt(response, onlykeyApi.sharedsec);
-                // console.log("DECODED RESPONSE:", response);
+                console.log("DECODED RESPONSE:", response);
                 console.log("DECODED RESPONSE(as string):", bytes2string(response));
-                // console.log("DECRYPTED RESPONSE:", data);
+                console.log("DECRYPTED RESPONSE:", data);
                 console.log("DECRYPTED RESPONSE(as string):", bytes2string(data));
                 break;
               default:
@@ -232,13 +232,16 @@ module.exports = function(imports) {
           if (OKSIGN == cmd) imports.app.emit("ok-signing");
           if (OKDECRYPT == cmd) imports.app.emit("ok-decrypting");
 
-          var delay = 1;
+          var delay = 2;
           if (onlykeyApi.OKversion == 'Original') {
             delay = 4;
           }
           await wait(delay * 1000);
             
             function sendPacket(){
+              
+              console.log("sending buffer to onlykey", cmd, opt1, opt2, opt3, msg);
+              
               return onlykeyApi.ctaphid_via_webauthn(cmd, opt1, opt2, opt3, msg, 6000, function(aerr, data) {
                 // console.log(data);
               });
@@ -274,11 +277,11 @@ module.exports = function(imports) {
           // .then(async response => {
           //decrypt data
           if (response != 1) {
-            // var decryptedparsedData = await aesgcm_decrypt(response, onlykeyApi.sharedsec);
-            // console.log("DECODED RESPONSE:", response);
-            // console.log("DECODED RESPONSE(as string):", bytes2string(response));
-            // console.log("DECRYPTED RESPONSE:", decryptedparsedData);
-            // console.log("DECRYPTED RESPONSE(as string):", bytes2string(decryptedparsedData));
+            var decryptedparsedData = await aesgcm_decrypt(response, onlykeyApi.sharedsec);
+            console.log("DECODED RESPONSE:", response);
+            console.log("DECODED RESPONSE(as string):", bytes2string(response));
+            console.log("DECRYPTED RESPONSE:", decryptedparsedData);
+            console.log("DECRYPTED RESPONSE(as string):", bytes2string(decryptedparsedData));
           }
           else if (ctaphid_response.error) {
             return onError(ctaphid_response.error);
@@ -298,7 +301,7 @@ module.exports = function(imports) {
             else {
               imports.app.emit("ok-activity");
               //cb();
-              bufferLoop();
+              return bufferLoop();
               // u2fSignBuffer(cipherText.slice(maxPacketSize), mainCallback, onError, KB_ONLYKEY);
             }
           }
@@ -306,7 +309,7 @@ module.exports = function(imports) {
             imports.app.emit("ok-error");
           }
         }
-        bufferLoop()
+        return bufferLoop()
       });
     }
 
@@ -722,6 +725,10 @@ module.exports = function(imports) {
 
     async function encryptText(key1, key2, msg, callback) {
       return new Promise(async(resolve, reject) => {
+//           function reject(err){
+//               console.warn("encryptText:err",err)
+//               $reject(err);
+//           }
         var keyStore = pgpkeyStore(reject);
         var keyList = [];
         var params;
