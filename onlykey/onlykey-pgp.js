@@ -61,8 +61,8 @@ module.exports = function(imports) {
 
         // var cb = callback || noop;
 
-        var delay = params.delay || onlykey_api_pgp.poll_delay;
-        var type = params.type || 0; // default type to 1
+        var delay = onlykey_api_pgp.poll_delay || 0;
+        var type = onlykeyApi.type; // default type to 1
         if (onlykeyApi.OKversion == 'Original') {
           delay = delay * 4;
         }
@@ -87,9 +87,9 @@ module.exports = function(imports) {
         cmd = OKPING;
         //}
 
-        //await wait(delay * 1000);
-        await wait(1000);
-        var ctaphid_response = await onlykeyApi.ctaphid_via_webauthn(cmd, null, null, null, encryptedkeyHandle, 30000, function(aerr, data) {
+        await wait(onlykey_api_pgp.poll_delay * 1000);
+        // await wait(1000);
+        var ctaphid_response = await onlykeyApi.ctaphid_via_webauthn(cmd, null, null, null, encryptedkeyHandle, 6000, function(aerr, data) {
           // console.log(aerr, data);
         });
 
@@ -196,9 +196,9 @@ module.exports = function(imports) {
      * Break cipherText into chunks and send via u2f sign
      * @param {Array} cipherText
      */
-    var packetnum = 0;
     function u2fSignBuffer(cipherText, mainCallback, onError, KB_ONLYKEY) {
       return new Promise(function(resolve) {
+        var packetnum = 0;
         var packetArray = _buildPacketArray(cipherText);
         var packets_count = packetArray.length;
         async function bufferLoop() {
@@ -232,17 +232,11 @@ module.exports = function(imports) {
           if (OKSIGN == cmd) imports.app.emit("ok-signing");
           if (OKDECRYPT == cmd) imports.app.emit("ok-decrypting");
 
-          var delay = 2;
-          if (onlykeyApi.OKversion == 'Original') {
-            delay = 4;
-          }
-          await wait(delay * 1000);
-            
             function sendPacket(){
               
               console.log("sending buffer to onlykey", cmd, opt1, opt2, opt3, msg);
               
-              return onlykeyApi.ctaphid_via_webauthn(cmd, opt1, opt2, opt3, msg, 30000, function(aerr, data) {
+              return onlykeyApi.ctaphid_via_webauthn(cmd, opt1, opt2, opt3, msg, 15000, function(aerr, data) {
                 // console.log(data);
               });
             }
@@ -251,18 +245,17 @@ module.exports = function(imports) {
 
          console.warn("u2fSignBuffer ctaphid_response status", ctaphid_response.status)
 
+          // if (finalPacket){
+          //     if(ctaphid_response.status == "CTAP1_SUCCESS"){
+          //           await wait(2 * 1000);
+          //           await onlykeyApi.check();
+          //           await wait(1000);
+          //           console.warn("we should have got CTAP2_ERR_USER_ACTION_PENDING here on final packet, try again");
+          //           ctaphid_response = await sendPacket();
+          //           console.warn("u2fSignBuffer ctaphid_response#2 status", ctaphid_response.status)
+          //     }
+          // }
           if (finalPacket){
-              if(ctaphid_response.status == "CTAP1_SUCCESS"){
-                    await wait(2 * 1000);
-                    await onlykeyApi.check();
-                    await wait(1000);
-                    console.warn("we should have got CTAP2_ERR_USER_ACTION_PENDING here on final packet, try again");
-                    ctaphid_response = await sendPacket();
-                    console.warn("u2fSignBuffer ctaphid_response#2 status", ctaphid_response.status)
-              }
-          }
-          if (finalPacket){
-              packetnum = 0;
           }
 
 
@@ -325,8 +318,8 @@ module.exports = function(imports) {
 
           if (secondsRemaining <= 1) {
             imports.app.emit("ok-waiting");
-            await wait(8000)
             _$status('done_challenge');
+            // await wait(1000);
           }
           if (secondsRemaining > 1) {
             onlykey_api_pgp.emit("status", `You have ${secondsRemaining} seconds to enter challenge code ${pin} on OnlyKey.`);
